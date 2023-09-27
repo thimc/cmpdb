@@ -27,7 +27,9 @@ var (
 	macroFlag    = flag.Bool("m", false, "adds the compilers predefined macros to the argument list")
 	writeFlag    = flag.Bool("w", false, "writes the content \"compile_commands.json\" (default behaviour is to write to stdout)")
 
-	makeFlags     = []string{"-Bknw"}
+	makeFlags     = []string{"-B", "-k", "-n", "-w"}
+	compilerFlags = []string{"-x", "-c", "-dM", "-E", "-"}
+
 	jsonFile      = "compile_commands.json"
 	make_entering = "Entering"
 	make_leaving  = "Leaving"
@@ -82,7 +84,7 @@ func getMakeCmd() string {
 }
 
 func runMakeCmd(baseDir string, args []string) (io.ReadCloser, error) {
-	cmd := exec.Command(getMakeCmd(), strings.Join(args, " "))
+	cmd := exec.Command(getMakeCmd(), args...)
 	cmd.Dir = baseDir
 	out, err := cmd.StdoutPipe()
 	if err != nil {
@@ -97,10 +99,10 @@ func runMakeCmd(baseDir string, args []string) (io.ReadCloser, error) {
 
 func scanProcOutput(baseDir string, reader io.ReadCloser) (*[]JSONFile, error) {
 	var (
-		db      = make([]JSONFile, 0)
-		scanner = bufio.NewScanner(reader)
+		db          = make([]JSONFile, 0)
+		scanner     = bufio.NewScanner(reader)
+		directories = list.New()
 	)
-	directories := list.New()
 	directories.PushFront(baseDir)
 
 	for scanner.Scan() {
@@ -129,6 +131,7 @@ func scanProcOutput(baseDir string, reader io.ReadCloser) (*[]JSONFile, error) {
 			}
 
 		} else if cc.Match([]byte(tokens[0])) || cpp.Match([]byte(tokens[0])) {
+
 			if shell.Match(line) {
 				groups := shell.FindAllStringSubmatch(string(line), 2)
 				for _, group := range groups {
@@ -152,17 +155,21 @@ func scanProcOutput(baseDir string, reader io.ReadCloser) (*[]JSONFile, error) {
 				if *macroFlag {
 					macros, err := getCompilerMacros(tokens[0])
 					if err != nil {
-						//TODO
+						//TODO: failed to retreive the compiler macros
 						continue
 					}
 					if len(macros) > 0 {
 						tokens = append(tokens, macros...)
 					}
 				}
-
 			}
 
 			entry.Arguments = removeDuplicates(removeEmpty(tokens))
+			for i, tok := range entry.Arguments {
+				if strings.Contains(tok, "\\\"") {
+					entry.Arguments[i] = strings.Replace(tok, "\\\"", "\"", -1)
+				}
+			}
 
 			if *commandFlag {
 				entry.Command = strings.Join(entry.Arguments, " ")
@@ -195,12 +202,9 @@ func scanProcOutput(baseDir string, reader io.ReadCloser) (*[]JSONFile, error) {
 }
 
 func getCompilerMacros(compiler string) ([]string, error) {
-	var (
-		out          []string
-		compilerArgs = []string{"-x", "-c", "-dM", "-E", "-"}
-	)
+	var out []string
 
-	macroCmd := exec.Command(compiler, compilerArgs...)
+	macroCmd := exec.Command(compiler, compilerFlags...)
 	outPipe, err := macroCmd.StdoutPipe()
 	if err != nil {
 		return out, err
@@ -212,6 +216,9 @@ func getCompilerMacros(compiler string) ([]string, error) {
 	scanner := bufio.NewScanner(outPipe)
 	for scanner.Scan() {
 		tokens := strings.Split(scanner.Text(), " ")
+		if len(tokens) < 3 {
+			return out, fmt.Errorf("TODO: getCompilerMacros failed scanning the line")
+		}
 		decl := fmt.Sprintf("-D%s=%s", tokens[1], strings.Join(tokens[2:], " "))
 		out = append(out, decl)
 	}
@@ -224,6 +231,7 @@ func getCompilerMacros(compiler string) ([]string, error) {
 
 func removeEmpty(array []string) []string {
 	var out []string
+
 	for _, item := range array {
 		if item != "" {
 			out = append(out, item)
@@ -235,6 +243,7 @@ func removeEmpty(array []string) []string {
 
 func removeDuplicates(array []string) []string {
 	var out []string
+
 	m := make(map[string]bool)
 	for _, item := range array {
 		if _, exist := m[item]; !exist {

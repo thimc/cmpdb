@@ -33,11 +33,11 @@ If you wish to alter the behaviour of cmpdb, these flags are available:
 
 ### Unit tests
 
-    @go test -v ./...
+    go test -v ./...
 
 ### Benchmarks:
 
-    @go test -v -bench=. -run=^#
+    go test -v -bench=. -run=^#
 
 
 Note: The benchmark is somewhat of a fork bomb as it spawns a new process

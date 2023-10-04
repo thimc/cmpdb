@@ -27,12 +27,22 @@ If you wish to alter the behaviour of cmpdb, these flags are available:
 ```
 
 ## Installation
-To install and run the unit tests, `make` is required. Simply invoke `make test`
-to run the unit tests and `make install` to install it to your system. You will
-need to have root access to install the program.
 
-Note: The benchmark is somewhat of a fork bomb as it calls `make` continuously
-in order to measure the total run time of what cmpdb's code functionality does.
+    go build -o cmpdb .
+    cp ./cmpdb /usr/local/bin/
+
+### Unit tests
+
+    @go test -v ./...
+
+### Benchmarks:
+
+    @go test -v -bench=. -run=^#
+
+
+Note: The benchmark is somewhat of a fork bomb as it spawns a new process
+continuously in order to measure the total run time of what cmpdb's code
+functionality does
 
 ## Bugs
 There is no man page for this tool.

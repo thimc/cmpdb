@@ -4,7 +4,7 @@ cmpdb (**c**o**mp**ilation **d**ata**b**ase) is a go rewrite of [compiledb](http
 
 This tool is suitable for make-based projects and is used to generate a
 [JSON Compilation Database file](https://clang.llvm.org/docs/JSONCompilationDatabase.html)
-for programs such as the popular LSP client, [clangd](https://clangd.llvm.org/).
+for programs such as the popular LSP server [clangd](https://clangd.llvm.org/).
 
 ## Usage
 Before you invoke cmpdb, make sure your current working directory is the root

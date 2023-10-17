@@ -43,6 +43,3 @@ If you wish to alter the behaviour of cmpdb, these flags are available:
 Note: The benchmark is somewhat of a fork bomb as it spawns a new process
 continuously in order to measure the total run time of what cmpdb's code
 functionality does
-
-## Bugs
-There is no man page for this tool.

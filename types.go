@@ -1,6 +1,12 @@
 package main
 
+// A compilation database is a JSON file, which consist of an array
+// of “command objects”, where each command object specifies one way
+// a translation unit is compiled in the project.  Each command object
+// contains the translation unit’s main file, the working directory
+// of the compile run and the actual compile command.
 type JSONFile struct {
+
 	// The working directory of the compilation. All paths specified in
 	// the command or file fields must be either absolute or relative to
 	// this directory.

@@ -1,0 +1,68 @@
+.TH cmpdb 1
+.SH NAME
+cmpdb \- compilation database generator
+.SH SYNOPSIS
+.B cmpdb
+.RB [ \-c ]
+.RB [ \-d
+.IR directory ]
+.RB [ \-f ]
+.RB [ \-h ]
+.RB [ \-i 
+.IR indentation ]
+.RB [ \-m ]
+.RB [ \-w ]
+.SH DESCRIPTION
+.B cmpdb
+is a go rewrite of compiledb(1) and is suitable for make-based projects. It is
+used to generate a JSON Compilation Database file that is then used by other
+tools such as the LSP (Language Server Protocol) server, clangd.
+.PP
+The options are as follows:
+.TP
+.B \-c
+Instead of appending each execution arguments as a list, the whole compilation
+command will be outputed as a single string in the JSON File.
+.TP
+.BI \-d " directory"
+Sets the working directory of cmpdb.
+.TP
+.BI \-f
+Expands the compilers executable path
+.TP
+.BI \-i " indentation"
+Sets the indentation for the JSON file. The default is four spaces ("    ").
+.TP
+.BI \-m
+Pulls all of the compilers predefined macros and appends them to the argument
+list of each target.
+.TP
+.BI \-w
+Will cause cmpdb to write all of its content to "compile_commands.json" instead
+of standard output.
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+.TP
+.B >0
+Error occurred.
+.SH EXAMPLES
+.EX
+.PP
+$ cmpdb > compile_commands.json
+.EE
+.PP
+A typical session of cmpdb, the program redirects its standard output to the
+file "compile_commands.json".
+.SH SEE ALSO
+.IR compiledb (1),
+.PP
+.SH AUTHOR
+Thim Cederlund
+.PP
+If you encounter any issues or would like to submit a pull request:
+.I
+https://github.com/thimc/cmpdb
+.SH BUGS
+Presumably.
